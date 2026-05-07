@@ -11,6 +11,14 @@ function useDebounce(value, delay = 350) {
   return debounced;
 }
 
+const SORTERS = {
+  "name-asc":    (a, b) => a.title.localeCompare(b.title),
+  "name-desc":   (a, b) => b.title.localeCompare(a.title),
+  "rating-desc": (a, b) => b.rating - a.rating,
+  "rating-asc":  (a, b) => a.rating - b.rating,
+  "default":     (a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0),
+};
+
 export default function useCourses() {
   const [search, setSearch]       = useState("");
   const [category, setCategory]   = useState("All");
@@ -29,40 +37,34 @@ export default function useCourses() {
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, category, minRating, sort]);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, category, minRating, sort]);
 
   const filtered = useMemo(() => {
-    let result = [...courses];
+    const q = debouncedSearch.trim().toLowerCase();
 
-    if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      result = result.filter(
-        (c) =>
-          c.title.toLowerCase().includes(q) ||
-          c.instructor.toLowerCase().includes(q) ||
-          c.category.toLowerCase().includes(q) ||
-          c.tags?.some((t) => t.toLowerCase().includes(q))
-      );
-    }
+    const matches = courses.filter((c) => {
+      if (q) {
+        const inTitle      = c.title.toLowerCase().includes(q);
+        const inInstructor = c.instructor.toLowerCase().includes(q);
+        const inCategory   = c.category.toLowerCase().includes(q);
+        const inTags       = c.tags?.some((tag) => tag.toLowerCase().includes(q)) ?? false;
+        if (!inTitle && !inInstructor && !inCategory && !inTags) return false;
+      }
+      if (category !== "All" && c.category !== category) return false;
+      if (minRating > 0 && c.rating < minRating) return false;
+      return true;
+    });
 
-    if (category !== "All") result = result.filter((c) => c.category === category);
-    if (minRating > 0)      result = result.filter((c) => c.rating >= minRating);
-
-    switch (sort) {
-      case "name-asc":    result.sort((a, b) => a.title.localeCompare(b.title)); break;
-      case "name-desc":   result.sort((a, b) => b.title.localeCompare(a.title)); break;
-      case "rating-desc": result.sort((a, b) => b.rating - a.rating); break;
-      case "rating-asc":  result.sort((a, b) => a.rating - b.rating); break;
-      default:            result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); break;
-    }
-
-    return result;
+    const sorter = SORTERS[sort] ?? SORTERS.default;
+    return [...matches].sort(sorter);
   }, [debouncedSearch, category, minRating, sort]);
 
   const totalPages = Math.ceil(filtered.length / COURSES_PER_PAGE);
   const paginated  = filtered.slice((page - 1) * COURSES_PER_PAGE, page * COURSES_PER_PAGE);
 
-  const hasActiveFilters = !!debouncedSearch || category !== "All" || minRating > 0 || sort !== "default";
+  const hasActiveFilters = debouncedSearch.trim() !== "" || category !== "All" || minRating > 0 || sort !== "default";
 
   const clearFilters = useCallback(() => {
     setSearch("");
