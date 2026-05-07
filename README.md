@@ -2,8 +2,10 @@
 
 A premium EdTech course directory built with React, Vite, and Tailwind CSS. Inspired by the editorial design language of Linear, Vercel, and Stripe — focused on typography, spacing, and UX restraint over feature density.
 
-![Frontlines Edutech](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80)
-
+<img width="1919" height="885" alt="image" src="https://github.com/user-attachments/assets/966c120b-de02-4c61-bf94-848d201f3516" />
+<img width="1918" height="873" alt="image" src="https://github.com/user-attachments/assets/302a2ccf-0f80-4f2d-9a0e-d7c0b2321de7" />
+<img width="1912" height="859" alt="image" src="https://github.com/user-attachments/assets/08edb5b9-9bc9-43d3-909b-6601831baf85" />
+<img width="1910" height="880" alt="image" src="https://github.com/user-attachments/assets/d3a1fa3d-b425-4703-abc0-52d083cb910f" />
 ## Tech Stack
 
 | Layer | Technology |
